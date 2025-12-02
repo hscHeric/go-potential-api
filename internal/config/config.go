@@ -1,8 +1,8 @@
+// Package config carrega as informações do arquivo .env usando viper
 package config
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/viper"
 )
@@ -12,15 +12,14 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Email    EmailConfig
-	Storage  StorageConfig
+	S3       S3Config
+	Tokens   TokensConfig
 }
 
 type ServerConfig struct {
-	Port        string
-	Env         string
-	FrontendURL string
+	Port   string
+	AppEnv string
 }
-
 type DatabaseConfig struct {
 	Host     string
 	Port     string
@@ -29,45 +28,44 @@ type DatabaseConfig struct {
 	DBName   string
 	SSLMode  string
 }
-
 type JWTConfig struct {
-	Secret                            string
-	ExpirationHours                   int
-	InvitationTokenExpirationHours    int
-	PasswordResetTokenExpirationHours int
+	Secret          string
+	ExpirationHours int
 }
-
 type EmailConfig struct {
-	SMTPHost string
-	SMTPPort string
-	SMTPUser string
-	SMTPPass string
-	From     string
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
 }
-
-type StorageConfig struct {
+type S3Config struct {
 	Endpoint  string
+	Region    string
 	AccessKey string
 	SecretKey string
 	Bucket    string
-	Region    string
 	UseSSL    bool
 }
+type TokensConfig struct {
+	ActivationExpirationHours    int
+	PasswordResetExpirationHours int
+	FrontendURL                  string
+}
 
-func LoadConfig() (*Config, error) {
+// LoadConfig carrega as configurações para uma struct Config usando viper
+func LoadConfig(path string) (*Config, error) {
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Error reading config file: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("erro ao ler arquivo de configuração: %w", err)
 	}
 
 	config := &Config{
 		Server: ServerConfig{
-			Port:        viper.GetString("PORT"),
-			Env:         viper.GetString("ENV"),
-			FrontendURL: viper.GetString("FRONTEND_URL"),
+			Port:   viper.GetString("PORT"),
+			AppEnv: viper.GetString("APP_ENV"),
 		},
 		Database: DatabaseConfig{
 			Host:     viper.GetString("DB_HOST"),
@@ -78,34 +76,33 @@ func LoadConfig() (*Config, error) {
 			SSLMode:  viper.GetString("DB_SSLMODE"),
 		},
 		JWT: JWTConfig{
-			Secret:                            viper.GetString("JWT_SECRET"),
-			ExpirationHours:                   viper.GetInt("JWT_EXPIRATION_HOURS"),
-			InvitationTokenExpirationHours:    viper.GetInt("INVITATION_TOKEN_EXPIRATION_HOURS"),
-			PasswordResetTokenExpirationHours: viper.GetInt("PASSWORD_RESET_TOKEN_EXPIRATION_HOURS"),
+			Secret:          viper.GetString("JWT_SECRET"),
+			ExpirationHours: viper.GetInt("JWT_EXPIRATION_HOURS"),
 		},
+
 		Email: EmailConfig{
-			SMTPHost: viper.GetString("SMTP_HOST"),
-			SMTPPort: viper.GetString("SMTP_PORT"),
-			SMTPUser: viper.GetString("SMTP_USER"),
-			SMTPPass: viper.GetString("SMTP_PASSWORD"),
-			From:     viper.GetString("SMTP_FROM"),
+			SMTPHost:     viper.GetString("SMTP_HOST"),
+			SMTPPort:     viper.GetInt("SMTP_PORT"),
+			SMTPUsername: viper.GetString("SMTP_USERNAME"),
+			SMTPPassword: viper.GetString("SMTP_PASSWORD"),
+			SMTPFrom:     viper.GetString("SMTP_FROM"),
 		},
-		Storage: StorageConfig{
+
+		S3: S3Config{
 			Endpoint:  viper.GetString("S3_ENDPOINT"),
+			Region:    viper.GetString("S3_REGION"),
 			AccessKey: viper.GetString("S3_ACCESS_KEY"),
 			SecretKey: viper.GetString("S3_SECRET_KEY"),
 			Bucket:    viper.GetString("S3_BUCKET"),
-			Region:    viper.GetString("S3_REGION"),
 			UseSSL:    viper.GetBool("S3_USE_SSL"),
+		},
+
+		Tokens: TokensConfig{
+			ActivationExpirationHours:    viper.GetInt("ACTIVATION_TOKEN_EXPIRATION_HOURS"),
+			PasswordResetExpirationHours: viper.GetInt("PASSWORD_RESET_TOKEN_EXPIRATION_HOURS"),
+			FrontendURL:                  viper.GetString("FRONTEND_URL"),
 		},
 	}
 
 	return config, nil
-}
-
-func (c *DatabaseConfig) GetDSN() string {
-	return fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.DBName, c.SSLMode,
-	)
 }
