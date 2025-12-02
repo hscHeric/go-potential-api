@@ -38,7 +38,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 201, "User registered successfully", user)
+	response.Success(c, 201, "Usuario registrado com sucesso", user)
 }
 
 // Login godoc
@@ -64,7 +64,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, 200, "Login successful", loginResponse)
+	response.Success(c, 200, "Login realizado com sucesso", loginResponse)
 }
 
 // Me godoc
@@ -82,7 +82,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	userEmail, _ := c.Get("user_email")
 	userRole, _ := c.Get("user_role")
 
-	response.Success(c, 200, "User info retrieved", gin.H{
+	response.Success(c, 200, "User info", gin.H{
 		"id":    userID,
 		"email": userEmail,
 		"role":  userRole,

@@ -33,7 +33,7 @@ func (r *userRepository) FindByEmail(email string) (*domain.User, error) {
 	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
+			return nil, errors.New("usuario não encontrado")
 		}
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (r *userRepository) FindByID(id uint) (*domain.User, error) {
 	err := r.db.First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
+			return nil, errors.New("usuario não encontrado")
 		}
 		return nil, err
 	}

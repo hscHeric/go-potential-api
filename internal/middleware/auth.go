@@ -30,7 +30,7 @@ func AuthMiddleware(cfg *config.Config) gin.HandlerFunc {
 		token := parts[1]
 		claims, err := utils.ValidateToken(token, cfg.JWT.Secret)
 		if err != nil {
-			response.Error(c, 401, "Invalid or expired token")
+			response.Error(c, 401, "Token invalido ou expirado")
 			c.Abort()
 			return
 		}
@@ -57,7 +57,7 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 		hasRole := slices.Contains(roles, roleStr)
 
 		if !hasRole {
-			response.Error(c, 403, "Forbidden: insufficient permissions")
+			response.Error(c, 403, "Forbidden: permissão negada")
 			c.Abort()
 			return
 		}

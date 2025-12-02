@@ -30,13 +30,13 @@ func (s *authService) Register(req *domain.RegisterRequest) (*domain.User, error
 	// Check if user already exists
 	existingUser, _ := s.userRepo.FindByEmail(req.Email)
 	if existingUser != nil {
-		return nil, errors.New("email already registered")
+		return nil, errors.New("email já está em uso")
 	}
 
 	// Hash password
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
-		return nil, errors.New("failed to hash password")
+		return nil, errors.New("falha ao gerar a hash da senha")
 	}
 
 	// Create user - SEMPRE como student no registro público
@@ -48,7 +48,7 @@ func (s *authService) Register(req *domain.RegisterRequest) (*domain.User, error
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
-		return nil, errors.New("failed to create user")
+		return nil, errors.New("falha ao criar usuário")
 	}
 
 	return user, nil
@@ -58,17 +58,17 @@ func (s *authService) Login(req *domain.LoginRequest) (*domain.LoginResponse, er
 	// Find user by email
 	user, err := s.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, errors.New("invalid credentials")
+		return nil, errors.New("credenciais inválidas")
 	}
 
 	// Check if user is active
 	if !user.IsActive {
-		return nil, errors.New("user account is inactive")
+		return nil, errors.New("o usuario está inativo")
 	}
 
 	// Check password
 	if !utils.CheckPassword(req.Password, user.PasswordHash) {
-		return nil, errors.New("invalid credentials")
+		return nil, errors.New("credenciais inválidas")
 	}
 
 	// Generate JWT token
@@ -80,7 +80,7 @@ func (s *authService) Login(req *domain.LoginRequest) (*domain.LoginResponse, er
 		s.cfg.JWT.ExpirationHours,
 	)
 	if err != nil {
-		return nil, errors.New("failed to generate token")
+		return nil, errors.New("falha ao gerar token de autenticação")
 	}
 
 	return &domain.LoginResponse{

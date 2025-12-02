@@ -29,7 +29,7 @@ func SeedDefaultAdmin(db *gorm.DB) error {
 	}
 
 	admin := &domain.User{
-		Email:        "admin@potencial.com",
+		Email:        "admin@potential.com",
 		PasswordHash: hashedPassword,
 		Role:         domain.RoleAdmin,
 		IsActive:     true,
@@ -40,7 +40,7 @@ func SeedDefaultAdmin(db *gorm.DB) error {
 	}
 
 	log.Println(" Default admin criado com sucesso!")
-	log.Println(" Email: admin@potencial.com")
+	log.Println(" Email: admin@potential.com")
 	log.Println(" Password: admin123456")
 	log.Println("  CHANGE THIS PASSWORD IN PRODUCTION!")
 

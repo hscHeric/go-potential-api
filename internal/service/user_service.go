@@ -31,14 +31,15 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 
 func (s *userService) CreateUser(req *domain.CreateUserRequest) (*domain.User, error) {
 	// Validar que role não seja admin
+	// Se for permitido apenas admins criarem outros admins remova esse código
 	if req.Role == domain.RoleAdmin {
-		return nil, errors.New("cannot create admin users")
+		return nil, errors.New("não é permitido criar usuários com papel de administrador")
 	}
 
 	// Check if user already exists
 	existingUser, _ := s.userRepo.FindByEmail(req.Email)
 	if existingUser != nil {
-		return nil, errors.New("email already registered")
+		return nil, errors.New("email já está em uso")
 	}
 
 	// Hash password
@@ -56,7 +57,7 @@ func (s *userService) CreateUser(req *domain.CreateUserRequest) (*domain.User, e
 	}
 
 	if err := s.userRepo.Create(user); err != nil {
-		return nil, errors.New("failed to create user")
+		return nil, errors.New("falha ao criar usuário")
 	}
 
 	return user, nil
@@ -78,7 +79,7 @@ func (s *userService) UpdateUserStatus(id uint, isActive bool) error {
 
 	// Não permitir desativar admin
 	if user.Role == domain.RoleAdmin {
-		return errors.New("cannot deactivate admin users")
+		return errors.New("não é permitido desativar usuários administradores")
 	}
 
 	user.IsActive = isActive
@@ -93,7 +94,7 @@ func (s *userService) DeleteUser(id uint) error {
 
 	// Não permitir deletar admin
 	if user.Role == domain.RoleAdmin {
-		return errors.New("cannot delete admin users")
+		return errors.New("não é permitido deletar usuários administradores")
 	}
 
 	return s.userRepo.Delete(id)
