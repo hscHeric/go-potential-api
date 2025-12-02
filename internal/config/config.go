@@ -11,12 +11,14 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	JWT      JWTConfig
-	Upload   UploadConfig
+	Email    EmailConfig
+	Storage  StorageConfig
 }
 
 type ServerConfig struct {
-	Port string
-	Env  string
+	Port        string
+	Env         string
+	FrontendURL string
 }
 
 type DatabaseConfig struct {
@@ -29,13 +31,27 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	Secret          string
-	ExpirationHours int
+	Secret                            string
+	ExpirationHours                   int
+	InvitationTokenExpirationHours    int
+	PasswordResetTokenExpirationHours int
 }
 
-type UploadConfig struct {
-	Path        string
-	MaxFileSize int64
+type EmailConfig struct {
+	SMTPHost string
+	SMTPPort string
+	SMTPUser string
+	SMTPPass string
+	From     string
+}
+
+type StorageConfig struct {
+	Endpoint  string
+	AccessKey string
+	SecretKey string
+	Bucket    string
+	Region    string
+	UseSSL    bool
 }
 
 func LoadConfig() (*Config, error) {
@@ -49,8 +65,9 @@ func LoadConfig() (*Config, error) {
 
 	config := &Config{
 		Server: ServerConfig{
-			Port: viper.GetString("PORT"),
-			Env:  viper.GetString("ENV"),
+			Port:        viper.GetString("PORT"),
+			Env:         viper.GetString("ENV"),
+			FrontendURL: viper.GetString("FRONTEND_URL"),
 		},
 		Database: DatabaseConfig{
 			Host:     viper.GetString("DB_HOST"),
@@ -61,12 +78,25 @@ func LoadConfig() (*Config, error) {
 			SSLMode:  viper.GetString("DB_SSLMODE"),
 		},
 		JWT: JWTConfig{
-			Secret:          viper.GetString("JWT_SECRET"),
-			ExpirationHours: viper.GetInt("JWT_EXPIRATION_HOURS"),
+			Secret:                            viper.GetString("JWT_SECRET"),
+			ExpirationHours:                   viper.GetInt("JWT_EXPIRATION_HOURS"),
+			InvitationTokenExpirationHours:    viper.GetInt("INVITATION_TOKEN_EXPIRATION_HOURS"),
+			PasswordResetTokenExpirationHours: viper.GetInt("PASSWORD_RESET_TOKEN_EXPIRATION_HOURS"),
 		},
-		Upload: UploadConfig{
-			Path:        viper.GetString("UPLOAD_PATH"),
-			MaxFileSize: viper.GetInt64("MAX_UPLOAD_SIZE"),
+		Email: EmailConfig{
+			SMTPHost: viper.GetString("SMTP_HOST"),
+			SMTPPort: viper.GetString("SMTP_PORT"),
+			SMTPUser: viper.GetString("SMTP_USER"),
+			SMTPPass: viper.GetString("SMTP_PASSWORD"),
+			From:     viper.GetString("SMTP_FROM"),
+		},
+		Storage: StorageConfig{
+			Endpoint:  viper.GetString("S3_ENDPOINT"),
+			AccessKey: viper.GetString("S3_ACCESS_KEY"),
+			SecretKey: viper.GetString("S3_SECRET_KEY"),
+			Bucket:    viper.GetString("S3_BUCKET"),
+			Region:    viper.GetString("S3_REGION"),
+			UseSSL:    viper.GetBool("S3_USE_SSL"),
 		},
 	}
 
