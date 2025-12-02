@@ -3,45 +3,55 @@ package domain
 import (
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
-type UserRole string
-
-const (
-	RoleAdmin   UserRole = "admin"
-	RoleTeacher UserRole = "teacher"
-	RoleStudent UserRole = "student"
-)
-
 type User struct {
-	ID           uint           `gorm:"primarykey" json:"id" example:"1"`
-	Email        string         `gorm:"uniqueIndex;not null" json:"email" example:"user@escola.com"`
-	PasswordHash string         `gorm:"not null" json:"-"`
-	Role         UserRole       `gorm:"type:varchar(20);not null" json:"role" example:"student"`
-	IsActive     bool           `gorm:"default:true" json:"is_active" example:"true"`
-	CreatedAt    time.Time      `json:"created_at" example:"2024-12-01T10:00:00Z"`
-	UpdatedAt    time.Time      `json:"updated_at" example:"2024-12-01T10:00:00Z"`
-	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	ID        uint      `gorm:"primarykey" json:"id"`
+	AuthID    uint      `gorm:"uniqueIndex;not null" json:"auth_id"`
+	FullName  string    `gorm:"not null" json:"full_name"`
+	CPF       string    `gorm:"uniqueIndex;not null" json:"cpf"`
+	BirthDate time.Time `gorm:"not null" json:"birth_date"`
+
+	// JSONB fields
+	Address    datatypes.JSON `gorm:"type:jsonb" json:"address"`
+	Contact    datatypes.JSON `gorm:"type:jsonb" json:"contact"`
+	Documents  datatypes.JSON `gorm:"type:jsonb" json:"documents"` // URLs dos documentos, se enviar arquivos
+	ProfilePic string         `json:"profile_pic"`
+
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email" example:"admin@escola.com"`
-	Password string `json:"password" binding:"required,min=6" example:"admin123456"`
+type Address struct {
+	Street     string `json:"street"`
+	Number     string `json:"number"`
+	Complement string `json:"complement,omitempty"`
+	District   string `json:"district"`
+	City       string `json:"city"`
+	State      string `json:"state"`
+	ZipCode    string `json:"zip_code"`
 }
 
-type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email" example:"aluno@escola.com"`
-	Password string `json:"password" binding:"required,min=6" example:"123456"`
+type Contact struct {
+	Phone       string `json:"phone"`
+	MobilePhone string `json:"mobile_phone,omitempty"`
+	WhatsApp    string `json:"whatsapp,omitempty"`
 }
 
-type CreateUserRequest struct {
-	Email    string   `json:"email" binding:"required,email" example:"professor@escola.com"`
-	Password string   `json:"password" binding:"required,min=6" example:"123456"`
-	Role     UserRole `json:"role" binding:"required,oneof=teacher student" example:"teacher"`
+type Documents struct {
+	RG             string `json:"rg,omitempty"`
+	CPFDoc         string `json:"cpf_doc,omitempty"`
+	ProofOfAddress string `json:"proof_of_address,omitempty"`
 }
 
-type LoginResponse struct {
-	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	User  User   `json:"user"`
+type CompleteProfileRequest struct {
+	FullName  string  `json:"full_name" binding:"required"`
+	CPF       string  `json:"cpf" binding:"required"`
+	BirthDate string  `json:"birth_date" binding:"required"` // YYYY-MM-DD
+	Password  string  `json:"password" binding:"required,min=6"`
+	Address   Address `json:"address" binding:"required"`
+	Contact   Contact `json:"contact" binding:"required"`
 }
