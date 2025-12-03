@@ -1,5 +1,4 @@
-// Package domain é a camada que defini o formato dos dados do usuário, então definido como duas structs Auth + User,
-// Além de definir uma estrutura para o token de ativação
+// Package domain define o formato dos dados
 package domain
 
 import (
