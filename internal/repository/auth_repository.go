@@ -76,3 +76,58 @@ func (r *authRepository) GetByID(id uuid.UUID) (*domain.Auth, error) {
 
 	return &auth, nil
 }
+
+func (r *authRepository) GetByEmail(email string) (*domain.Auth, error) {
+	query := `
+		SELECT id, email, password_hash, role, status, created_at, updated_at
+		FROM auth
+		WHERE email = $1
+	`
+
+	var auth domain.Auth
+	err := r.db.Get(&auth, query, email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to get auth by email: %w", err)
+	}
+
+	return &auth, nil
+}
+
+func (r *authRepository) Update(auth *domain.Auth) error {
+	query := `
+		UPDATE auth
+		SET email = $1, role = $2, status = $3, updated_at = $4
+		WHERE id = $5
+	`
+
+	auth.UpdatedAt = time.Now()
+
+	result, err := r.db.Exec(
+		query,
+		auth.Email,
+		auth.Role,
+		auth.Status,
+		auth.UpdatedAt,
+		auth.ID,
+	)
+	if err != nil {
+		if IsDuplicateKeyError(err) {
+			return ErrEmailAlreadyExists
+		}
+		return fmt.Errorf("failed to update auth: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
