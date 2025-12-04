@@ -94,7 +94,7 @@ func (r *authRepository) GetByEmail(email string) (*domain.Auth, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get auth by email: %w", err)
+		return nil, fmt.Errorf("falha ao buscar auth pelo email: %w", err)
 	}
 
 	return &auth, nil
@@ -121,12 +121,12 @@ func (r *authRepository) Update(auth *domain.Auth) error {
 		if IsDuplicateKeyError(err) {
 			return ErrEmailAlreadyExists
 		}
-		return fmt.Errorf("failed to update auth: %w", err)
+		return fmt.Errorf("falha ao atualizar auth: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf("falha ao verificar as linhas afetadas: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -145,12 +145,12 @@ func (r *authRepository) UpdateStatus(id uuid.UUID, status domain.UserStatus) er
 
 	result, err := r.db.Exec(query, status, time.Now(), id)
 	if err != nil {
-		return fmt.Errorf("failed to update auth status: %w", err)
+		return fmt.Errorf("falha ao atualizar o auth status: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf("falha ao verificar as linhas afetadas: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -169,12 +169,12 @@ func (r *authRepository) UpdatePassword(id uuid.UUID, passwordHash string) error
 
 	result, err := r.db.Exec(query, passwordHash, time.Now(), id)
 	if err != nil {
-		return fmt.Errorf("failed to update password: %w", err)
+		return fmt.Errorf("falha ao atualizar a senha: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf("falha ao verificar as linhas afetadas: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -189,12 +189,12 @@ func (r *authRepository) Delete(id uuid.UUID) error {
 
 	result, err := r.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete auth: %w", err)
+		return fmt.Errorf("falha ao deletar auth: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf("falha ao verificar o número de linhas afetadas: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -210,7 +210,7 @@ func (r *authRepository) ExistsByEmail(email string) (bool, error) {
 	var exists bool
 	err := r.db.Get(&exists, query, email)
 	if err != nil {
-		return false, fmt.Errorf("failed to check if email exists: %w", err)
+		return false, fmt.Errorf("falha ao verificar se o email existe: %w", err)
 	}
 
 	return exists, nil
