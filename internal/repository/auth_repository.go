@@ -27,6 +27,10 @@ type authRepository struct {
 	db *sqlx.DB
 }
 
+func NewAuthRepository(db *sqlx.DB) AuthRepository {
+	return &authRepository{db: db}
+}
+
 func (r *authRepository) Create(auth *domain.Auth) error {
 	query := `
 		INSERT INTO auth (id, email, password_hash, role, status, created_at, updated_at)
@@ -130,4 +134,84 @@ func (r *authRepository) Update(auth *domain.Auth) error {
 	}
 
 	return nil
+}
+
+func (r *authRepository) UpdateStatus(id uuid.UUID, status domain.UserStatus) error {
+	query := `
+		UPDATE auth
+		SET status = $1, updated_at = $2
+		WHERE id = $3
+	`
+
+	result, err := r.db.Exec(query, status, time.Now(), id)
+	if err != nil {
+		return fmt.Errorf("failed to update auth status: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (r *authRepository) UpdatePassword(id uuid.UUID, passwordHash string) error {
+	query := `
+		UPDATE auth
+		SET password_hash = $1, updated_at = $2
+		WHERE id = $3
+	`
+
+	result, err := r.db.Exec(query, passwordHash, time.Now(), id)
+	if err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (r *authRepository) Delete(id uuid.UUID) error {
+	query := `DELETE FROM auth WHERE id = $1`
+
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete auth: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (r *authRepository) ExistsByEmail(email string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM auth WHERE email = $1)`
+
+	var exists bool
+	err := r.db.Get(&exists, query, email)
+	if err != nil {
+		return false, fmt.Errorf("failed to check if email exists: %w", err)
+	}
+
+	return exists, nil
 }
