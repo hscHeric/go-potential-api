@@ -29,6 +29,12 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// LoginResponse representa a resposta de login
+type LoginResponse struct {
+	Token string               `json:"token"`
+	User  *domain.UserWithAuth `json:"user"`
+}
+
 // RequestPasswordResetRequest representa o payload para solicitar reset de senha
 type RequestPasswordResetRequest struct {
 	Email string `json:"email" binding:"required,email"`

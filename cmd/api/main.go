@@ -6,6 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/hscHeric/go-potential-api/docs"
+	_ "github.com/lib/pq"
+
 	"github.com/hscHeric/go-potential-api/internal/config"
 	"github.com/hscHeric/go-potential-api/internal/database"
 	"github.com/hscHeric/go-potential-api/internal/handler"

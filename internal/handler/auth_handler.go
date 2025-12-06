@@ -23,8 +23,8 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 
 // CreateInvitation godoc
 // @Summary Criar convite para novo usuário
-// @Description Admin cria um convite informando email e papel (role)
-// @Tags Autenticação
+// @Description Admin cria um convite informando email e cargo
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body CreateInvitationRequest true "Dados do convite"
@@ -39,14 +39,14 @@ func (h *AuthHandler) CreateInvitation(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Formato de requisição inválido",
+			Error: "Corpo da requisição inválido",
 		})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Falha na validação dos dados",
+			Error:   "Falha na validação",
 			Details: validator.FormatValidationErrors(err),
 		})
 		return
@@ -55,13 +55,13 @@ func (h *AuthHandler) CreateInvitation(c *gin.Context) {
 	if err := h.authService.CreateInvitation(req.Email, req.Role); err != nil {
 		if errors.Is(err, repository.ErrEmailAlreadyExists) {
 			c.JSON(http.StatusConflict, ErrorResponse{
-				Error: "O e-mail informado já está em uso",
+				Error: "Este email já está cadastrado",
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Erro ao criar convite",
+			Error: "Falha ao criar convite",
 		})
 		return
 	}
@@ -74,7 +74,7 @@ func (h *AuthHandler) CreateInvitation(c *gin.Context) {
 // ValidateActivationToken godoc
 // @Summary Validar token de ativação
 // @Description Verifica se o token de ativação é válido
-// @Tags Autenticação
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param token query string true "Token de ativação"
@@ -85,7 +85,7 @@ func (h *AuthHandler) ValidateActivationToken(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "O token é obrigatório",
+			Error: "Token é obrigatório",
 		})
 		return
 	}
@@ -119,12 +119,12 @@ func (h *AuthHandler) ValidateActivationToken(c *gin.Context) {
 }
 
 // CompleteRegistration godoc
-// @Summary Completar cadastro de usuário
-// @Description Usuário finaliza seu cadastro informando dados pessoais e senha
-// @Tags Autenticação
+// @Summary Completar registro do usuário
+// @Description Usuário completa o registro com dados pessoais e senha
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body CompleteRegistrationRequest true "Dados de cadastro"
+// @Param request body CompleteRegistrationRequest true "Dados do registro"
 // @Success 201 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/v1/auth/complete-registration [post]
@@ -133,14 +133,14 @@ func (h *AuthHandler) CompleteRegistration(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Formato de requisição inválido",
+			Error: "Corpo da requisição inválido",
 		})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Falha na validação dos dados",
+			Error:   "Falha na validação",
 			Details: validator.FormatValidationErrors(err),
 		})
 		return
@@ -170,32 +170,32 @@ func (h *AuthHandler) CompleteRegistration(c *gin.Context) {
 		}
 		if errors.Is(err, service.ErrUserAlreadyCompleted) {
 			c.JSON(http.StatusBadRequest, ErrorResponse{
-				Error: "O usuário já completou o cadastro anteriormente",
+				Error: "O cadastro deste usuário já foi concluído",
 			})
 			return
 		}
 		if errors.Is(err, repository.ErrCPFAlreadyExists) {
 			c.JSON(http.StatusConflict, ErrorResponse{
-				Error: "O CPF informado já está cadastrado",
+				Error: "Este CPF já está cadastrado",
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Erro ao completar cadastro",
+			Error: "Falha ao completar registro",
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, MessageResponse{
-		Message: "Cadastro concluído com sucesso",
+		Message: "Registro concluído com sucesso",
 	})
 }
 
 // Login godoc
 // @Summary Login do usuário
-// @Description Autentica usuário com email e senha
-// @Tags Autenticação
+// @Description Autentica o usuário com email e senha
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body LoginRequest true "Credenciais de login"
@@ -208,38 +208,43 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Formato de requisição inválido",
+			Error: "Corpo da requisição inválido",
 		})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Falha na validação dos dados",
+			Error:   "Falha na validação",
 			Details: validator.FormatValidationErrors(err),
 		})
 		return
 	}
 
-	response, err := h.authService.Login(req.Email, req.Password)
+	serviceResponse, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidCredentials) {
 			c.JSON(http.StatusUnauthorized, ErrorResponse{
-				Error: "E-mail ou senha inválidos",
+				Error: "Email ou senha inválidos",
 			})
 			return
 		}
 		if errors.Is(err, service.ErrUserNotActive) {
 			c.JSON(http.StatusUnauthorized, ErrorResponse{
-				Error: "O usuário não está ativo",
+				Error: "Usuário não está ativo",
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Erro ao realizar login",
+			Error: "Falha ao realizar login",
 		})
 		return
+	}
+
+	response := LoginResponse{
+		Token: serviceResponse.Token,
+		User:  serviceResponse.User,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -247,11 +252,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 // RequestPasswordReset godoc
 // @Summary Solicitar redefinição de senha
-// @Description Envia email com instruções para redefinir senha
-// @Tags Autenticação
+// @Description Envia um email para redefinição de senha
+// @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body RequestPasswordResetRequest true "E-mail"
+// @Param request body RequestPasswordResetRequest true "Email"
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/v1/auth/request-password-reset [post]
@@ -260,14 +265,14 @@ func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Formato de requisição inválido",
+			Error: "Corpo da requisição inválido",
 		})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Falha na validação dos dados",
+			Error:   "Falha na validação",
 			Details: validator.FormatValidationErrors(err),
 		})
 		return
@@ -275,20 +280,20 @@ func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
 
 	if err := h.authService.RequestPasswordReset(req.Email); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error: "Erro ao solicitar redefinição de senha",
+			Error: "Falha ao processar a solicitação de redefinição de senha",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, MessageResponse{
-		Message: "Se o email existir, um link para redefinição de senha foi enviado",
+		Message: "Se o email existir, um link de redefinição de senha será enviado",
 	})
 }
 
 // ResetPassword godoc
 // @Summary Redefinir senha
-// @Description Redefine a senha do usuário utilizando um token
-// @Tags Autenticação
+// @Description Redefine a senha do usuário usando um token
+// @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body ResetPasswordRequest true "Dados para redefinição"
@@ -300,14 +305,14 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error: "Formato de requisição inválido",
+			Error: "Corpo da requisição inválido",
 		})
 		return
 	}
 
 	if err := validator.Validate(req); err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "Falha na validação dos dados",
+			Error:   "Falha na validação",
 			Details: validator.FormatValidationErrors(err),
 		})
 		return
