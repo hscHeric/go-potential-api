@@ -3,6 +3,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -20,6 +21,7 @@ type ServerConfig struct {
 	Port   string
 	AppEnv string
 }
+
 type DatabaseConfig struct {
 	Host     string
 	Port     string
@@ -28,10 +30,12 @@ type DatabaseConfig struct {
 	DBName   string
 	SSLMode  string
 }
+
 type JWTConfig struct {
 	Secret          string
 	ExpirationHours int
 }
+
 type EmailConfig struct {
 	SMTPHost     string
 	SMTPPort     int
@@ -39,6 +43,7 @@ type EmailConfig struct {
 	SMTPPassword string
 	SMTPFrom     string
 }
+
 type S3Config struct {
 	Endpoint  string
 	Region    string
@@ -47,15 +52,21 @@ type S3Config struct {
 	Bucket    string
 	UseSSL    bool
 }
+
 type TokensConfig struct {
 	ActivationExpirationHours    int
 	PasswordResetExpirationHours int
 	FrontendURL                  string
 }
 
-// LoadConfig carrega as configurações para uma struct Config usando viper
+// LoadConfig carrega as configurações usando Viper
 func LoadConfig(path string) (*Config, error) {
-	viper.SetConfigFile(".env")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(path)
+	viper.AddConfigPath(".")
+
+	// Permite sobrescrever com variáveis de ambiente
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -79,7 +90,6 @@ func LoadConfig(path string) (*Config, error) {
 			Secret:          viper.GetString("JWT_SECRET"),
 			ExpirationHours: viper.GetInt("JWT_EXPIRATION_HOURS"),
 		},
-
 		Email: EmailConfig{
 			SMTPHost:     viper.GetString("SMTP_HOST"),
 			SMTPPort:     viper.GetInt("SMTP_PORT"),
@@ -87,7 +97,6 @@ func LoadConfig(path string) (*Config, error) {
 			SMTPPassword: viper.GetString("SMTP_PASSWORD"),
 			SMTPFrom:     viper.GetString("SMTP_FROM"),
 		},
-
 		S3: S3Config{
 			Endpoint:  viper.GetString("S3_ENDPOINT"),
 			Region:    viper.GetString("S3_REGION"),
@@ -96,7 +105,6 @@ func LoadConfig(path string) (*Config, error) {
 			Bucket:    viper.GetString("S3_BUCKET"),
 			UseSSL:    viper.GetBool("S3_USE_SSL"),
 		},
-
 		Tokens: TokensConfig{
 			ActivationExpirationHours:    viper.GetInt("ACTIVATION_TOKEN_EXPIRATION_HOURS"),
 			PasswordResetExpirationHours: viper.GetInt("PASSWORD_RESET_TOKEN_EXPIRATION_HOURS"),
@@ -105,4 +113,32 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+// GetDatabaseURL retorna a URL de conexão do banco
+func (c *Config) GetDatabaseURL() string {
+	return fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		c.Database.Host,
+		c.Database.Port,
+		c.Database.User,
+		c.Database.Password,
+		c.Database.DBName,
+		c.Database.SSLMode,
+	)
+}
+
+// GetJWTExpiration retorna a duração de expiração do JWT
+func (c *Config) GetJWTExpiration() time.Duration {
+	return time.Duration(c.JWT.ExpirationHours) * time.Hour
+}
+
+// GetActivationTokenExpiration retorna a duração de expiração do token de ativação
+func (c *Config) GetActivationTokenExpiration() time.Duration {
+	return time.Duration(c.Tokens.ActivationExpirationHours) * time.Hour
+}
+
+// GetPasswordResetTokenExpiration retorna a duração de expiração do token de reset
+func (c *Config) GetPasswordResetTokenExpiration() time.Duration {
+	return time.Duration(c.Tokens.PasswordResetExpirationHours) * time.Hour
 }
