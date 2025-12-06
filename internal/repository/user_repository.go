@@ -24,6 +24,10 @@ type UserRepository interface {
 	ExistsByAuthID(authID uuid.UUID) (bool, error)
 }
 
+func NewUserRepository(db *sqlx.DB) UserRepository {
+	return &userRepository{db: db}
+}
+
 type userRepository struct {
 	db *sqlx.DB
 }
