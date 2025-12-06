@@ -32,7 +32,7 @@ func NewAuthHandler(authService service.AuthService) *AuthHandler {
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
-// @Router /api/v1/invitations [post]
+// @Router /invitations [post]
 // @Security BearerAuth
 func (h *AuthHandler) CreateInvitation(c *gin.Context) {
 	var req CreateInvitationRequest
@@ -80,7 +80,7 @@ func (h *AuthHandler) CreateInvitation(c *gin.Context) {
 // @Param token query string true "Token de ativação"
 // @Success 200 {object} ValidateTokenResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /api/v1/auth/validate-activation-token [get]
+// @Router /auth/validate-activation-token [get]
 func (h *AuthHandler) ValidateActivationToken(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
@@ -127,7 +127,7 @@ func (h *AuthHandler) ValidateActivationToken(c *gin.Context) {
 // @Param request body CompleteRegistrationRequest true "Dados do registro"
 // @Success 201 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /api/v1/auth/complete-registration [post]
+// @Router /auth/complete-registration [post]
 func (h *AuthHandler) CompleteRegistration(c *gin.Context) {
 	var req CompleteRegistrationRequest
 
@@ -202,7 +202,7 @@ func (h *AuthHandler) CompleteRegistration(c *gin.Context) {
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/auth/login [post]
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 
@@ -259,7 +259,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Param request body RequestPasswordResetRequest true "Email"
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /api/v1/auth/request-password-reset [post]
+// @Router /auth/request-password-reset [post]
 func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
 	var req RequestPasswordResetRequest
 
@@ -299,7 +299,7 @@ func (h *AuthHandler) RequestPasswordReset(c *gin.Context) {
 // @Param request body ResetPasswordRequest true "Dados para redefinição"
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
-// @Router /api/v1/auth/reset-password [post]
+// @Router /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
 

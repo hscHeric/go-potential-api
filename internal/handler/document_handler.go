@@ -31,7 +31,7 @@ func NewDocumentHandler(documentService service.DocumentService) *DocumentHandle
 // @Success 201 {object} domain.Document
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/documents [post]
+// @Router /documents [post]
 // @Security BearerAuth
 func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)
@@ -89,7 +89,7 @@ func (h *DocumentHandler) UploadDocument(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} domain.Document
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/documents [get]
+// @Router /documents [get]
 // @Security BearerAuth
 func (h *DocumentHandler) GetUserDocuments(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)
@@ -121,7 +121,7 @@ func (h *DocumentHandler) GetUserDocuments(c *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
-// @Router /api/v1/documents/{id} [get]
+// @Router /documents/{id} [get]
 // @Security BearerAuth
 func (h *DocumentHandler) GetDocumentByID(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)
@@ -159,7 +159,7 @@ func (h *DocumentHandler) GetDocumentByID(c *gin.Context) {
 // @Success 200 {array} domain.Document
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
-// @Router /api/v1/documents/pending [get]
+// @Router /documents/pending [get]
 // @Security BearerAuth
 func (h *DocumentHandler) GetPendingDocuments(c *gin.Context) {
 	documents, err := h.documentService.GetPendingDocuments()
@@ -183,7 +183,7 @@ func (h *DocumentHandler) GetPendingDocuments(c *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
-// @Router /api/v1/documents/{id}/approve [patch]
+// @Router /documents/{id}/approve [patch]
 // @Security BearerAuth
 func (h *DocumentHandler) ApproveDocument(c *gin.Context) {
 	adminAuthID, err := middleware.GetAuthID(c)
@@ -225,7 +225,7 @@ func (h *DocumentHandler) ApproveDocument(c *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Failure 403 {object} ErrorResponse
-// @Router /api/v1/documents/{id}/reject [patch]
+// @Router /documents/{id}/reject [patch]
 // @Security BearerAuth
 func (h *DocumentHandler) RejectDocument(c *gin.Context) {
 	adminAuthID, err := middleware.GetAuthID(c)
@@ -273,7 +273,7 @@ func (h *DocumentHandler) RejectDocument(c *gin.Context) {
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/documents/{id} [delete]
+// @Router /documents/{id} [delete]
 // @Security BearerAuth
 func (h *DocumentHandler) DeleteDocument(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)

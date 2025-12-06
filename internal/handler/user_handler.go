@@ -26,7 +26,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 // @Produce json
 // @Success 200 {object} domain.UserWithAuth
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/users/me [get]
+// @Router /users/me [get]
 // @Security BearerAuth
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)
@@ -58,7 +58,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/users/me [put]
+// @Router /users/me [put]
 // @Security BearerAuth
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	authID, err := middleware.GetAuthID(c)
@@ -114,7 +114,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 // @Success 200 {object} MessageResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
-// @Router /api/v1/users/me/profile-picture [put]
+// @Router /users/me/profile-picture [put]
 // @Security BearerAuth
 func (h *UserHandler) UpdateProfilePicture(c *gin.Context) {
 	// Aqui você pode implementar a lógica de upload
