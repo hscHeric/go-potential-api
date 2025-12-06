@@ -6,12 +6,20 @@ import (
 	"log"
 	"time"
 
-	"github.com/hscHeric/go-potential-api/internal/config"
 	"github.com/jmoiron/sqlx"
 )
 
+type Config struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DBName   string
+	SSLMode  string
+}
+
 // Connect estabele conexeção com o banco de dados
-func Connect(cfg *config.DatabaseConfig) (*sqlx.DB, error) {
+func Connect(cfg Config) (*sqlx.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
