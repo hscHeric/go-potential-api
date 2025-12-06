@@ -1,10 +1,10 @@
 .PHONY: help install build run clean test docker-up docker-down docker-reset docker-logs migrate-up migrate-down migrate-drop migrate-force migrate-version migrate-create swagger dev
 
-# Carregar variáveis de ambiente
+# Load environment variables
 include .env
 export
 
-# Variáveis
+# Variables
 APP_NAME=potential-idiomas-api
 BINARY_NAME=api
 DOCKER_COMPOSE=docker-compose
@@ -12,246 +12,246 @@ MIGRATE=migrate
 MIGRATIONS_PATH=./migrations
 DB_URL=postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)
 
-# Alvo padrão
+# Default target
 help:
-	@echo "Comandos disponíveis:"
-	@echo "  make install          Instalar dependências do Go"
-	@echo "  make build            Compilar a aplicação"
-	@echo "  make run              Executar a aplicação"
-	@echo "  make dev              Executar com hot reload (requer air)"
-	@echo "  make clean            Limpar arquivos de build"
-	@echo "  make test             Executar testes"
+	@echo "Available commands:"
+	@echo "  make install         Install Go dependencies"
+	@echo "  make build          Build the application"
+	@echo "  make run            Run the application"
+	@echo "  make dev            Run with hot reload (requires air)"
+	@echo "  make clean          Clean build artifacts"
+	@echo "  make test           Run tests"
 	@echo ""
-	@echo "Comandos Docker:"
-	@echo "  make docker-up        Iniciar todos os containers Docker"
-	@echo "  make docker-down      Parar todos os containers"
-	@echo "  make docker-reset     Resetar ambiente Docker (remove volumes)"
-	@echo "  make docker-logs      Exibir logs do Docker"
-	@echo "  make docker-ps        Exibir containers em execução"
+	@echo "Docker commands:"
+	@echo "  make docker-up      Start all Docker containers"
+	@echo "  make docker-down    Stop all Docker containers"
+	@echo "  make docker-reset   Stop, remove volumes and restart containers"
+	@echo "  make docker-logs    Show Docker logs"
+	@echo "  make docker-ps      Show running containers"
 	@echo ""
-	@echo "Comandos de migração:"
-	@echo "  make migrate-up       Aplicar migrations pendentes"
-	@echo "  make migrate-down     Reverter última migration"
-	@echo "  make migrate-drop     Apagar todas as migrations (PERIGOSO)"
-	@echo "  make migrate-force    Forçar versão da migration (ex: make migrate-force VERSION=1)"
-	@echo "  make migrate-version  Mostrar versão atual da migration"
-	@echo "  make migrate-create   Criar nova migration (ex: make migrate-create NAME=add_users)"
+	@echo "Database migration commands:"
+	@echo "  make migrate-up     Apply all pending migrations"
+	@echo "  make migrate-down   Revert last migration"
+	@echo "  make migrate-drop   Drop all migrations (WARNING: deletes all data)"
+	@echo "  make migrate-force  Force migration version (usage: make migrate-force VERSION=1)"
+	@echo "  make migrate-version Show current migration version"
+	@echo "  make migrate-create  Create new migration (usage: make migrate-create NAME=add_users)"
 	@echo ""
-	@echo "Documentação Swagger:"
-	@echo "  make swagger          Gerar documentação Swagger"
+	@echo "API documentation:"
+	@echo "  make swagger        Generate Swagger documentation"
 
-# Instalar dependências
+# Install dependencies
 install:
-	@echo "Instalando dependências..."
+	@echo "Installing dependencies..."
 	go mod download
 	go mod tidy
-	@echo "Dependências instaladas com sucesso"
+	@echo "Dependencies installed successfully"
 
-# Compilar a aplicação
+# Build the application
 build:
-	@echo "Compilando aplicação..."
+	@echo "Building application..."
 	go build -o bin/$(BINARY_NAME) cmd/api/main.go
-	@echo "Build concluído: bin/$(BINARY_NAME)"
+	@echo "Build complete: bin/$(BINARY_NAME)"
 
-# Rodar a aplicação
+# Run the application
 run: build
-	@echo "Iniciando aplicação..."
+	@echo "Starting application..."
 	./bin/$(BINARY_NAME)
 
-# Rodar com hot reload
+# Run with hot reload (requires air: go install github.com/cosmtrek/air@latest)
 dev:
-	@echo "Iniciando servidor de desenvolvimento com hot reload..."
+	@echo "Starting development server with hot reload..."
 	air
 
-# Limpar arquivos de build
+# Clean build artifacts
 clean:
-	@echo "Limpando arquivos de build..."
+	@echo "Cleaning build artifacts..."
 	rm -rf bin/
 	rm -rf tmp/
 	go clean
-	@echo "Limpeza concluída"
+	@echo "Clean complete"
 
-# Executar testes
+# Run tests
 test:
-	@echo "Executando testes..."
+	@echo "Running tests..."
 	go test -v -cover ./...
 
-# Testes com cobertura
+# Run tests with coverage report
 test-coverage:
-	@echo "Executando testes com relatório de cobertura..."
+	@echo "Running tests with coverage..."
 	go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
-	@echo "Relatório de cobertura gerado: coverage.html"
+	@echo "Coverage report generated: coverage.html"
 
-# Comandos Docker
+# Docker commands
 docker-up:
-	@echo "Iniciando containers Docker..."
+	@echo "Starting Docker containers..."
 	$(DOCKER_COMPOSE) up -d
-	@echo "Aguardando serviços iniciarem..."
+	@echo "Waiting for services to be ready..."
 	@sleep 5
-	@echo "Containers em execução"
+	@echo "Docker containers are running"
 	@$(MAKE) docker-ps
 
 docker-down:
-	@echo "Parando containers Docker..."
+	@echo "Stopping Docker containers..."
 	$(DOCKER_COMPOSE) down
-	@echo "Containers parados"
+	@echo "Docker containers stopped"
 
 docker-reset:
-	@echo "Resetando ambiente Docker..."
+	@echo "Resetting Docker environment..."
 	$(DOCKER_COMPOSE) down -v
-	@echo "Removendo volumes e containers órfãos..."
+	@echo "Removing volumes and orphaned containers..."
 	docker volume prune -f
-	@echo "Iniciando containers novamente..."
+	@echo "Starting fresh containers..."
 	$(DOCKER_COMPOSE) up -d
-	@echo "Aguardando serviços iniciarem..."
+	@echo "Waiting for services to be ready..."
 	@sleep 5
-	@echo "Ambiente Docker resetado com sucesso"
+	@echo "Docker environment reset complete"
 	@$(MAKE) migrate-up
 
 docker-logs:
-	@echo "Exibindo logs do Docker (Ctrl+C para sair)..."
+	@echo "Showing Docker logs (Ctrl+C to exit)..."
 	$(DOCKER_COMPOSE) logs -f
 
 docker-logs-api:
-	@echo "Exibindo logs da API (Ctrl+C para sair)..."
+	@echo "Showing API logs (Ctrl+C to exit)..."
 	$(DOCKER_COMPOSE) logs -f api
 
 docker-logs-db:
-	@echo "Exibindo logs do banco de dados (Ctrl+C para sair)..."
+	@echo "Showing database logs (Ctrl+C to exit)..."
 	$(DOCKER_COMPOSE) logs -f postgres
 
 docker-ps:
-	@echo "Containers em execução:"
+	@echo "Running containers:"
 	@$(DOCKER_COMPOSE) ps
 
 docker-restart:
-	@echo "Reiniciando containers Docker..."
+	@echo "Restarting Docker containers..."
 	$(DOCKER_COMPOSE) restart
-	@echo "Containers reiniciados"
+	@echo "Containers restarted"
 
-# Comandos de migração
+# Database migration commands
 migrate-up:
-	@echo "Aplicando migrations..."
+	@echo "Applying migrations..."
 	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" up
-	@echo "Migrations aplicadas com sucesso"
+	@echo "Migrations applied successfully"
 
 migrate-down:
-	@echo "Revertendo última migration..."
+	@echo "Reverting last migration..."
 	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" down 1
-	@echo "Migration revertida"
+	@echo "Migration reverted successfully"
 
 migrate-drop:
-	@echo "ATENÇÃO: Isso irá apagar todas as tabelas e dados"
-	@read -p "Tem certeza? [y/N] " -n 1 -r; \
+	@echo "WARNING: This will drop all tables and data"
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" drop -f; \
-		echo "Todas as migrations foram apagadas"; \
+		echo "All migrations dropped"; \
 	else \
-		echo "Operação cancelada"; \
+		echo "Operation cancelled"; \
 	fi
 
 migrate-force:
 	@if [ -z "$(VERSION)" ]; then \
-		echo "ERRO: VERSION é obrigatória"; \
-		echo "Uso: make migrate-force VERSION=1"; \
+		echo "ERROR: VERSION is required"; \
+		echo "Usage: make migrate-force VERSION=1"; \
 		exit 1; \
 	fi
-	@echo "Forçando versão da migration para $(VERSION)..."
+	@echo "Forcing migration version $(VERSION)..."
 	$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" force $(VERSION)
-	@echo "Versão forçada para $(VERSION)"
+	@echo "Migration version forced to $(VERSION)"
 
 migrate-version:
-	@echo "Versão atual da migration:"
+	@echo "Current migration version:"
 	@$(MIGRATE) -path $(MIGRATIONS_PATH) -database "$(DB_URL)" version
 
 migrate-create:
 	@if [ -z "$(NAME)" ]; then \
-		echo "ERRO: NAME é obrigatório"; \
-		echo "Uso: make migrate-create NAME=add_users_table"; \
+		echo "ERROR: NAME is required"; \
+		echo "Usage: make migrate-create NAME=add_users_table"; \
 		exit 1; \
 	fi
-	@echo "Criando migration: $(NAME)"
+	@echo "Creating migration: $(NAME)"
 	$(MIGRATE) create -ext sql -dir $(MIGRATIONS_PATH) -seq $(NAME)
-	@echo "Arquivos de migration criados"
+	@echo "Migration files created"
 
-# Acesso ao banco
+# Database access
 db-connect:
-	@echo "Conectando ao banco..."
+	@echo "Connecting to database..."
 	docker exec -it potential_db psql -U $(DB_USER) -d $(DB_NAME)
 
 db-dump:
-	@echo "Gerando dump do banco..."
+	@echo "Creating database dump..."
 	docker exec potential_db pg_dump -U $(DB_USER) $(DB_NAME) > backup_$$(date +%Y%m%d_%H%M%S).sql
-	@echo "Dump criado com sucesso"
+	@echo "Dump created successfully"
 
 db-restore:
 	@if [ -z "$(FILE)" ]; then \
-		echo "ERRO: FILE é obrigatório"; \
-		echo "Uso: make db-restore FILE=backup.sql"; \
+		echo "ERROR: FILE is required"; \
+		echo "Usage: make db-restore FILE=backup.sql"; \
 		exit 1; \
 	fi
-	@echo "Restaurando banco a partir de $(FILE)..."
+	@echo "Restoring database from $(FILE)..."
 	docker exec -i potential_db psql -U $(DB_USER) -d $(DB_NAME) < $(FILE)
-	@echo "Banco restaurado com sucesso"
+	@echo "Database restored successfully"
 
-# Swagger
+# Swagger documentation
 swagger:
-	@echo "Gerando documentação Swagger..."
+	@echo "Generating Swagger documentation..."
 	swag init -g cmd/api/main.go -o docs
-	@echo "Documentação gerada em docs/"
+	@echo "Swagger documentation generated in docs/"
+	@echo "Access docs at: http://localhost:8080/swagger/index.html"
 
-# Helpers de desenvolvimento
+# Development helpers
 setup: install docker-up migrate-up
-	@echo "Ambiente de desenvolvimento configurado com sucesso"
-	@echo "Banco de dados pronto com todas as migrations aplicadas"
+	@echo "Development environment setup complete"
+	@echo "Database is ready with all migrations applied"
 
 reset: clean docker-reset
-	@echo "Ambiente resetado com sucesso"
+	@echo "Environment reset complete"
 
-# Lint e formatação
+# Linting and formatting
 lint:
-	@echo "Executando linter..."
+	@echo "Running linter..."
 	golangci-lint run ./...
 
 fmt:
-	@echo "Formatando código..."
+	@echo "Formatting code..."
 	go fmt ./...
 	goimports -w .
 
-# Instalar ferramentas de desenvolvimento
+# Install development tools
 install-tools:
-	@echo "Instalando ferramentas de desenvolvimento..."
+	@echo "Installing development tools..."
 	go install github.com/cosmtrek/air@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	@echo "Ferramentas instaladas"
+	@echo "Development tools installed"
 
-# Build de produção
+# Production build
 build-prod:
-	@echo "Compilando para produção..."
+	@echo "Building for production..."
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/$(BINARY_NAME) cmd/api/main.go
-	@echo "Build de produção concluído"
+	@echo "Production build complete"
 
-# Build Docker da API
+# Docker build for API
 docker-build:
-	@echo "Construindo imagem Docker..."
+	@echo "Building Docker image..."
 	docker build -t $(APP_NAME):latest .
-	@echo "Imagem Docker construída com sucesso"
+	@echo "Docker image built successfully"
 
-# Reset total (cuidado!)
+# Full reset and setup (dangerous - use with caution)
 nuke: docker-down
-	@echo "ATENÇÃO: Isso irá remover TODOS os containers, volumes e dados"
-	@read -p "Tem certeza? Digite 'yes' para confirmar: " confirm; \
+	@echo "WARNING: This will remove all containers, volumes, and data"
+	@read -p "Are you sure? Type 'yes' to confirm: " confirm; \
 	if [ "$$confirm" = "yes" ]; then \
 		docker-compose down -v --remove-orphans; \
 		docker system prune -f; \
 		rm -rf bin/ tmp/; \
-		echo "Ambiente completamente removido"; \
-		echo "Execute 'make setup' para reinicializar"; \
+		echo "Environment nuked successfully"; \
+		echo "Run 'make setup' to reinitialize"; \
 	else \
-		echo "Operação cancelada"; \
+		echo "Operation cancelled"; \
 	fi
-
