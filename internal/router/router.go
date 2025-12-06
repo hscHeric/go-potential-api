@@ -36,7 +36,7 @@ func SetupRouter(cfg RouterConfig) *gin.Engine {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API v1
-	v1 := router.Group("")
+	v1 := router.Group("/api/v1")
 	{
 		// Auth routes (públicas)
 		auth := v1.Group("/auth")
