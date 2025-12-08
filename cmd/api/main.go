@@ -15,7 +15,6 @@ import (
 	"github.com/hscHeric/go-potential-api/internal/repository"
 	"github.com/hscHeric/go-potential-api/internal/router"
 	"github.com/hscHeric/go-potential-api/internal/service"
-	"github.com/hscHeric/go-potential-api/internal/storage"
 	"github.com/hscHeric/go-potential-api/pkg/email"
 	"github.com/hscHeric/go-potential-api/pkg/jwt"
 )
@@ -68,7 +67,6 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	activationTokenRepo := repository.NewActivationTokenRepository(db)
 	passwordResetRepo := repository.NewPasswordResetTokenRepository(db)
-	documentRepo := repository.NewDocumentRepository(db)
 
 	// Inicializar services
 	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.ExpirationHours)
@@ -82,17 +80,17 @@ func main() {
 	)
 
 	// Inicializar storage (S3/MinIO)
-	s3Storage, err := storage.NewS3Storage(storage.S3Config{
-		Endpoint:  cfg.S3.Endpoint,
-		Region:    cfg.S3.Region,
-		AccessKey: cfg.S3.AccessKey,
-		SecretKey: cfg.S3.SecretKey,
-		Bucket:    cfg.S3.Bucket,
-		UseSSL:    cfg.S3.UseSSL,
-	})
-	if err != nil {
-		log.Fatalf("Failed to initialize S3 storage: %v", err)
-	}
+	// _s3Storage, err := storage.NewS3Storage(storage.S3Config{
+	// 	Endpoint:  cfg.S3.Endpoint,
+	// 	Region:    cfg.S3.Region,
+	// 	AccessKey: cfg.S3.AccessKey,
+	// 	SecretKey: cfg.S3.SecretKey,
+	// 	Bucket:    cfg.S3.Bucket,
+	// 	UseSSL:    cfg.S3.UseSSL,
+	// })
+	// if err != nil {
+	// 	log.Fatalf("Failed to initialize S3 storage: %v", err)
+	// }
 
 	authService := service.NewAuthService(
 		authRepo,
@@ -107,23 +105,15 @@ func main() {
 
 	userService := service.NewUserService(authRepo, userRepo)
 
-	documentService := service.NewDocumentService(
-		userRepo,
-		documentRepo,
-		s3Storage,
-	)
-
 	// Inicializar handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
-	documentHandler := handler.NewDocumentHandler(documentService)
 
 	// Configurar router
 	routerCfg := router.RouterConfig{
-		AuthHandler:     authHandler,
-		UserHandler:     userHandler,
-		DocumentHandler: documentHandler,
-		JWTService:      jwtService,
+		AuthHandler: authHandler,
+		UserHandler: userHandler,
+		JWTService:  jwtService,
 	}
 
 	r := router.SetupRouter(routerCfg)

@@ -103,22 +103,3 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		Message: "Perfil atualizado com sucesso",
 	})
 }
-
-// UpdateProfilePicture godoc
-// @Summary Atualizar foto de perfil
-// @Description Atualiza a foto de perfil do usuário autenticado
-// @Tags usuários
-// @Accept multipart/form-data
-// @Produce json
-// @Param file formData file true "Foto de perfil"
-// @Success 200 {object} MessageResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Router /users/me/profile-picture [put]
-// @Security BearerAuth
-func (h *UserHandler) UpdateProfilePicture(c *gin.Context) {
-	// Aqui você pode implementar a lógica de upload
-	c.JSON(http.StatusInternalServerError, ErrorResponse{
-		Error: "Upload de foto de perfil ainda não foi implementado",
-	})
-}

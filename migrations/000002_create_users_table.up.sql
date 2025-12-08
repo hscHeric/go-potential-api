@@ -7,7 +7,6 @@ CREATE TABLE users (
     birth_date DATE NOT NULL,
     address JSONB NOT NULL,
     contact JSONB NOT NULL,
-    profile_pic TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

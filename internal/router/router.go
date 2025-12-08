@@ -11,10 +11,9 @@ import (
 )
 
 type RouterConfig struct {
-	AuthHandler     *handler.AuthHandler
-	UserHandler     *handler.UserHandler
-	DocumentHandler *handler.DocumentHandler
-	JWTService      *jwt.Service
+	AuthHandler *handler.AuthHandler
+	UserHandler *handler.UserHandler
+	JWTService  *jwt.Service
 }
 
 func SetupRouter(cfg RouterConfig) *gin.Engine {
@@ -62,27 +61,6 @@ func SetupRouter(cfg RouterConfig) *gin.Engine {
 		{
 			users.GET("/me", cfg.UserHandler.GetProfile)
 			users.PUT("/me", cfg.UserHandler.UpdateProfile)
-			users.PUT("/me/profile-picture", cfg.UserHandler.UpdateProfilePicture)
-		}
-
-		// Document routes
-		documents := v1.Group("/documents")
-		documents.Use(middleware.AuthMiddleware(cfg.JWTService))
-		{
-			// Rotas para todos os usuários autenticados
-			documents.POST("", cfg.DocumentHandler.UploadDocument)
-			documents.GET("", cfg.DocumentHandler.GetUserDocuments)
-			documents.GET("/:id", cfg.DocumentHandler.GetDocumentByID)
-			documents.DELETE("/:id", cfg.DocumentHandler.DeleteDocument)
-
-			// Rotas apenas para admin
-			admin := documents.Group("")
-			admin.Use(middleware.RequireAdmin())
-			{
-				admin.GET("/pending", cfg.DocumentHandler.GetPendingDocuments)
-				admin.PATCH("/:id/approve", cfg.DocumentHandler.ApproveDocument)
-				admin.PATCH("/:id/reject", cfg.DocumentHandler.RejectDocument)
-			}
 		}
 	}
 

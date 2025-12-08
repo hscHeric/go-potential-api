@@ -12,7 +12,6 @@ import (
 type UserService interface {
 	GetProfile(authID uuid.UUID) (*domain.UserWithAuth, error)
 	UpdateProfile(authID uuid.UUID, input *UpdateProfileInput) error
-	UpdateProfilePicture(authID uuid.UUID, pictureURL string) error
 	GetByID(userID uuid.UUID) (*domain.User, error)
 }
 
@@ -88,24 +87,6 @@ func (s *userService) UpdateProfile(authID uuid.UUID, input *UpdateProfileInput)
 	// Salvar alterações
 	if err := s.userRepo.Update(user); err != nil {
 		return fmt.Errorf("falha ao atualizar o usuário: %w", err)
-	}
-
-	return nil
-}
-
-func (s *userService) UpdateProfilePicture(authID uuid.UUID, pictureURL string) error {
-	// Buscar user
-	user, err := s.userRepo.GetByAuthID(authID)
-	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
-			return errors.New("usuário não encontrado")
-		}
-		return fmt.Errorf("falha ao obter o usuário: %w", err)
-	}
-
-	// Atualizar foto
-	if err := s.userRepo.UpdateProfilePic(user.ID, pictureURL); err != nil {
-		return fmt.Errorf("falha ao atualizar a foto de perfil: %w", err)
 	}
 
 	return nil

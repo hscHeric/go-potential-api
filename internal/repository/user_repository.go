@@ -62,7 +62,6 @@ func (r *userRepository) Create(user *domain.User) error {
 		user.BirthDate,
 		addressJSON,
 		contactJSON,
-		user.ProfilePic,
 		user.CreatedAt,
 		user.UpdatedAt,
 	)
@@ -94,7 +93,6 @@ func (r *userRepository) GetByID(id uuid.UUID) (*domain.User, error) {
 		&user.BirthDate,
 		&addressJSON,
 		&contactJSON,
-		&user.ProfilePic,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -135,7 +133,6 @@ func (r *userRepository) GetByAuthID(authID uuid.UUID) (*domain.User, error) {
 		&user.BirthDate,
 		&addressJSON,
 		&contactJSON,
-		&user.ProfilePic,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -175,7 +172,6 @@ func (r *userRepository) GetByCPF(cpf string) (*domain.User, error) {
 		&user.BirthDate,
 		&addressJSON,
 		&contactJSON,
-		&user.ProfilePic,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

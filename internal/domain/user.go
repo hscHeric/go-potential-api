@@ -57,16 +57,15 @@ type Contact struct {
 
 // User representa as informações pessoais do usuário
 type User struct {
-	ID         uuid.UUID `db:"id" json:"id"`
-	AuthID     uuid.UUID `db:"auth_id" json:"auth_id"`
-	FullName   string    `db:"full_name" json:"full_name" binding:"required,min=3"`
-	CPF        string    `db:"cpf" json:"cpf" binding:"required,len=11"`
-	BirthDate  time.Time `db:"birth_date" json:"birth_date" binding:"required"`
-	Address    Address   `db:"address" json:"address" binding:"required"`
-	Contact    Contact   `db:"contact" json:"contact" binding:"required"`
-	ProfilePic *string   `db:"profile_pic" json:"profile_pic"`
-	CreatedAt  time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt  time.Time `db:"updated_at" json:"updated_at"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	AuthID    uuid.UUID `db:"auth_id" json:"auth_id"`
+	FullName  string    `db:"full_name" json:"full_name" binding:"required,min=3"`
+	CPF       string    `db:"cpf" json:"cpf" binding:"required,len=11"`
+	BirthDate time.Time `db:"birth_date" json:"birth_date" binding:"required"`
+	Address   Address   `db:"address" json:"address" binding:"required"`
+	Contact   Contact   `db:"contact" json:"contact" binding:"required"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 // ActivationToken representa o token de ativação de conta
