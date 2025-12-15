@@ -32,7 +32,7 @@ func NewService(host string, port int, username, password, fromEmail, frontendUR
 
 // SendActivationEmail envia email de ativação de conta
 func (s *Service) SendActivationEmail(to, name, token string) error {
-	activationURL := fmt.Sprintf("%s/activate?token=%s", s.frontendURL, token)
+	activationURL := fmt.Sprintf("%s/register?token=%s", s.frontendURL, token)
 
 	data := map[string]any{
 		"Name":          name,
@@ -52,7 +52,7 @@ func (s *Service) SendActivationEmail(to, name, token string) error {
 func (s *Service) SendPasswordResetEmail(to, name, token string) error {
 	resetURL := fmt.Sprintf("%s/reset-password?token=%s", s.frontendURL, token)
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Name":     name,
 		"ResetURL": resetURL,
 	}
