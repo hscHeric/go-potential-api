@@ -68,7 +68,7 @@ func (s *Service) SendPasswordResetEmail(to, name, token string) error {
 
 // SendWelcomeEmail envia email de boas-vindas após ativação
 func (s *Service) SendWelcomeEmail(to, name string) error {
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Name": name,
 	}
 
@@ -181,6 +181,66 @@ func (s *Service) renderTemplate(templateName string, data map[string]any) (stri
             Se tiver alguma dúvida, entre em contato conosco.
         </p>
         <p>Atenciosamente,<br>Equipe Potential Idiomas</p>
+    </div>
+</body>
+</html>
+`,
+		"class_scheduled": `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Aula Agendada</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #3498db;">Nova Aula Agendada!</h2>
+        <p>Olá, {{.StudentName}}!</p>
+        <p>Uma nova aula foi agendada para você.</p>
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 5px 0;"><strong>Data:</strong> {{.Date}}</p>
+            <p style="margin: 5px 0;"><strong>Horário:</strong> {{.StartTime}} - {{.EndTime}}</p>
+            <p style="margin: 5px 0;"><strong>Professor:</strong> {{.TeacherName}}</p>
+            {{if .Title}}<p style="margin: 5px 0;"><strong>Tema:</strong> {{.Title}}</p>{{end}}
+            {{if .ClassLink}}
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{{.ClassLink}}" 
+                   style="background-color: #27ae60; color: white; padding: 12px 30px; 
+                          text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Entrar na Aula
+                </a>
+            </div>
+            {{end}}
+        </div>
+        <p style="color: #7f8c8d; font-size: 14px;">
+            Não esqueça de comparecer no horário marcado!
+        </p>
+    </div>
+</body>
+</html>
+`,
+		"class_cancelled": `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Aula Cancelada</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #e74c3c;">Aula Cancelada</h2>
+        <p>Olá, {{.StudentName}}!</p>
+        <p>Infelizmente, a aula abaixo foi cancelada:</p>
+        <div style="background-color: #fee; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #e74c3c;">
+            <p style="margin: 5px 0;"><strong>Data:</strong> {{.Date}}</p>
+            <p style="margin: 5px 0;"><strong>Horário:</strong> {{.StartTime}} - {{.EndTime}}</p>
+            <p style="margin: 5px 0;"><strong>Professor:</strong> {{.TeacherName}}</p>
+            {{if .Title}}<p style="margin: 5px 0;"><strong>Tema:</strong> {{.Title}}</p>{{end}}
+        </div>
+        <p>Entre em contato com seu professor para reagendar.</p>
+        <p style="color: #7f8c8d; font-size: 14px;">
+            Desculpe pelo transtorno.
+        </p>
     </div>
 </body>
 </html>
