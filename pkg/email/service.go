@@ -204,3 +204,8 @@ func (s *Service) renderTemplate(templateName string, data map[string]any) (stri
 
 	return buf.String(), nil
 }
+
+// SendCustomEmail envia um email customizado com assunto e corpo HTML
+func (s *Service) SendCustomEmail(to, subject, htmlBody string) error {
+	return s.sendEmail(to, subject, htmlBody)
+}
