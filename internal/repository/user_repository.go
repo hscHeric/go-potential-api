@@ -18,7 +18,6 @@ type UserRepository interface {
 	GetByAuthID(authID uuid.UUID) (*domain.User, error)
 	GetByCPF(cpf string) (*domain.User, error)
 	Update(user *domain.User) error
-	UpdateProfilePic(id uuid.UUID, profilePic string) error
 	Delete(id uuid.UUID) error
 	ExistsByCPF(cpf string) (bool, error)
 	ExistsByAuthID(authID uuid.UUID) (bool, error)
@@ -34,8 +33,8 @@ type userRepository struct {
 
 func (r *userRepository) Create(user *domain.User) error {
 	query := `
-		INSERT INTO users (id, auth_id, full_name, cpf, birth_date, address, contact, profile_pic, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO users (id, auth_id, full_name, cpf, birth_date, address, contact, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
 	user.ID = uuid.New()
@@ -227,30 +226,6 @@ func (r *userRepository) Update(user *domain.User) error {
 			return ErrCPFAlreadyExists
 		}
 		return fmt.Errorf("falha ao atualizar o usuário: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("falha ao verificar o número de linhas afetadas: %w", err)
-	}
-
-	if rowsAffected == 0 {
-		return ErrNotFound
-	}
-
-	return nil
-}
-
-func (r *userRepository) UpdateProfilePic(id uuid.UUID, profilePic string) error {
-	query := `
-		UPDATE users
-		SET profile_pic = $1, updated_at = $2
-		WHERE id = $3
-	`
-
-	result, err := r.db.Exec(query, profilePic, time.Now(), id)
-	if err != nil {
-		return fmt.Errorf("falha ao atualizar a foto de perfil do usuário: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
