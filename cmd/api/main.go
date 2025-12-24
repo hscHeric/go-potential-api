@@ -6,8 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	_ "github.com/hscHeric/go-potential-api/docs"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Import do driver PostgreSQL
 
 	"github.com/hscHeric/go-potential-api/internal/config"
 	"github.com/hscHeric/go-potential-api/internal/database"
@@ -17,6 +16,8 @@ import (
 	"github.com/hscHeric/go-potential-api/internal/service"
 	"github.com/hscHeric/go-potential-api/pkg/email"
 	"github.com/hscHeric/go-potential-api/pkg/jwt"
+
+	_ "github.com/hscHeric/go-potential-api/docs" // Import do Swagger
 )
 
 // @title Potential Idiomas API
@@ -67,6 +68,9 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	activationTokenRepo := repository.NewActivationTokenRepository(db)
 	passwordResetRepo := repository.NewPasswordResetTokenRepository(db)
+	timeSlotRepo := repository.NewTimeSlotRepository(db)
+	classRepo := repository.NewClassRepository(db)
+	classStudentRepo := repository.NewClassStudentRepository(db)
 
 	// Inicializar services
 	jwtService := jwt.NewService(cfg.JWT.Secret, cfg.JWT.ExpirationHours)
@@ -78,19 +82,6 @@ func main() {
 		cfg.Email.SMTPFrom,
 		cfg.Tokens.FrontendURL,
 	)
-
-	// Inicializar storage (S3/MinIO)
-	// _s3Storage, err := storage.NewS3Storage(storage.S3Config{
-	// 	Endpoint:  cfg.S3.Endpoint,
-	// 	Region:    cfg.S3.Region,
-	// 	AccessKey: cfg.S3.AccessKey,
-	// 	SecretKey: cfg.S3.SecretKey,
-	// 	Bucket:    cfg.S3.Bucket,
-	// 	UseSSL:    cfg.S3.UseSSL,
-	// })
-	// if err != nil {
-	// 	log.Fatalf("Failed to initialize S3 storage: %v", err)
-	// }
 
 	authService := service.NewAuthService(
 		authRepo,
@@ -105,15 +96,30 @@ func main() {
 
 	userService := service.NewUserService(authRepo, userRepo)
 
+	timeSlotService := service.NewTimeSlotService(timeSlotRepo, authRepo)
+
+	classService := service.NewClassService(
+		classRepo,
+		classStudentRepo,
+		timeSlotRepo,
+		userRepo,
+		authRepo,
+		emailService,
+	)
+
 	// Inicializar handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
+	timeSlotHandler := handler.NewTimeSlotHandler(timeSlotService)
+	classHandler := handler.NewClassHandler(classService)
 
 	// Configurar router
 	routerCfg := router.RouterConfig{
-		AuthHandler: authHandler,
-		UserHandler: userHandler,
-		JWTService:  jwtService,
+		AuthHandler:     authHandler,
+		UserHandler:     userHandler,
+		TimeSlotHandler: timeSlotHandler,
+		ClassHandler:    classHandler,
+		JWTService:      jwtService,
 	}
 
 	r := router.SetupRouter(routerCfg)
