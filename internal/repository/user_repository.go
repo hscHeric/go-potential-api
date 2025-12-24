@@ -77,7 +77,7 @@ func (r *userRepository) Create(user *domain.User) error {
 
 func (r *userRepository) GetByID(id uuid.UUID) (*domain.User, error) {
 	query := `
-		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, profile_pic, created_at, updated_at
+		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -117,7 +117,7 @@ func (r *userRepository) GetByID(id uuid.UUID) (*domain.User, error) {
 
 func (r *userRepository) GetByAuthID(authID uuid.UUID) (*domain.User, error) {
 	query := `
-		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, profile_pic, created_at, updated_at
+		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, created_at, updated_at
 		FROM users
 		WHERE auth_id = $1
 	`
@@ -156,7 +156,7 @@ func (r *userRepository) GetByAuthID(authID uuid.UUID) (*domain.User, error) {
 
 func (r *userRepository) GetByCPF(cpf string) (*domain.User, error) {
 	query := `
-		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, profile_pic, created_at, updated_at
+		SELECT id, auth_id, full_name, cpf, birth_date, address, contact, created_at, updated_at
 		FROM users
 		WHERE cpf = $1
 	`
