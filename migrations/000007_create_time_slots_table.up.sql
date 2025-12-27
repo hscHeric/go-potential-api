@@ -1,7 +1,7 @@
 -- Tabela de horários disponíveis do professor (recorrentes)
 CREATE TABLE time_slots (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    teacher_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    teacher_id UUID NOT NULL REFERENCES auth(id) ON DELETE CASCADE,  -- Mudança aqui
     day_of_week INTEGER NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
